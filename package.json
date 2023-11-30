@@ -1,0 +1,28 @@
+{
+    "name": "aws-store-sqs-config-ssm",
+    "version": "0.0.1",
+    "description": "A GitHub Action to store file contents to AWS SSM, with optional base64 encoding",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/your-username/aws-store-sqs-config-ssm.git"
+    },
+    "keywords": [
+      "github",
+      "action",
+      "aws",
+      "ssm",
+      "file",
+      "base64"
+    ],
+    "author": "Deric Abel",
+    "license": "LGPL-3.0-or-later",
+    "dependencies": {
+      "@actions/core": "^1.2.6",
+      "aws-sdk": "^2.814.0"
+    }
+  }
+  
