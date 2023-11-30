@@ -1,0 +1,16 @@
+name: 'Store File to SSM'
+description: 'Takes a file, optionally encodes it in base64, and stores to AWS SSM'
+inputs:
+  file-path:
+    description: 'The path to the file'
+    required: true
+  base64:
+    description: 'If true, encode the file in base64'
+    required: true
+    default: 'false'
+  ssm-path:
+    description: 'SSM path to store the file content'
+    required: true
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
