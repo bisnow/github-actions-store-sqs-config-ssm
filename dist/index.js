@@ -20,19 +20,36 @@ async function run() {
         // Initialize AWS SSM
         const ssm = new AWS.SSM();
 
-        // Store in SSM
-        const params = {
+        // Get the current value from SSM
+        const currentParam = await ssm.getParameter({
             Name: ssmPath,
-            Value: fileContent,
-            Type: 'String',  // Or 'SecureString' if it's sensitive data
-            Overwrite: true
-        };
+            WithDecryption: true
+        }).promise();
 
-        await ssm.putParameter(params).promise();
+        // Compare the current SSM value with the file content
+        if (currentParam.Parameter.Value !== fileContent) {
+            // If different, update the SSM parameter
+            const params = {
+                Name: ssmPath,
+                Value: fileContent,
+                Type: 'String',  // Or 'SecureString' if it's sensitive data
+                Overwrite: true
+            };
 
-        console.log(`File content stored in SSM at path: ${ssmPath}`);
+            await ssm.putParameter(params).promise();
+
+            console.log(`SSM Parameter updated at path: ${ssmPath}`);
+        } else {
+            console.log(`No update required. SSM Parameter at path ${ssmPath} is up-to-date.`);
+        }
     } catch (error) {
-        core.setFailed(`Action failed with error: ${error}`);
+        // Handle cases where the parameter does not exist
+        if (error.code === 'ParameterNotFound') {
+            console.log(`Parameter not found at path: ${ssmPath}. A new parameter will be created.`);
+            // Code to create a new parameter here
+        } else {
+            core.setFailed(`Action failed with error: ${error}`);
+        }
     }
 }
 
