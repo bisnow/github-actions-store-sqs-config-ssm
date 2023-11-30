@@ -20,15 +20,8 @@ async function run() {
         // Initialize AWS SSM
         const ssm = new AWS.SSM();
 
-        // Get the current value from SSM
-        const currentParam = await ssm.getParameter({
-            Name: ssmPath,
-            WithDecryption: true
-        }).promise();
-
-        // Compare the current SSM value with the file content
-        if (currentParam.Parameter.Value !== fileContent) {
-            // If different, update the SSM parameter
+        // Function to create or update the parameter
+        async function putParameter() {
             const params = {
                 Name: ssmPath,
                 Value: fileContent,
@@ -37,19 +30,35 @@ async function run() {
             };
 
             await ssm.putParameter(params).promise();
+            console.log(`Parameter stored at path: ${ssmPath}`);
+        }
 
-            console.log(`SSM Parameter updated at path: ${ssmPath}`);
-        } else {
-            console.log(`No update required. SSM Parameter at path ${ssmPath} is up-to-date.`);
+        // Attempt to get the current value from SSM
+        try {
+            const currentParam = await ssm.getParameter({
+                Name: ssmPath,
+                WithDecryption: true
+            }).promise();
+
+            // Compare and update only if different
+            if (currentParam.Parameter.Value !== fileContent) {
+                await putParameter();
+            } else {
+                console.log(`No update required. SSM Parameter at path ${ssmPath} is up-to-date.`);
+            }
+        } catch (error) {
+            if (error.code === 'ParameterNotFound') {
+                // Parameter not found, create a new one
+                console.log(`Parameter not found at path: ${ssmPath}. Creating a new parameter.`);
+                await putParameter();
+            } else {
+                // Some other error occurred
+                core.setFailed(`Action failed with error: ${error}`);
+            }
         }
+
     } catch (error) {
-        // Handle cases where the parameter does not exist
-        if (error.code === 'ParameterNotFound') {
-            console.log(`Parameter not found at path: ${ssmPath}. A new parameter will be created.`);
-            // Code to create a new parameter here
-        } else {
-            core.setFailed(`Action failed with error: ${error}`);
-        }
+        core.setFailed(`Action failed with error: ${error}`);
     }
 }
 
