@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const fs = require('fs');
-const AWS = require('aws-sdk');
+const { SSMClient, PutParameterCommand, GetParameterCommand } = require("@aws-sdk/client-ssm");
 
 async function run() {
     try {
@@ -17,8 +17,8 @@ async function run() {
             fileContent = Buffer.from(fileContent).toString('base64');
         }
 
-        // Initialize AWS SSM
-        const ssm = new AWS.SSM();
+        // Initialize AWS SSM Client
+        const ssmClient = new SSMClient({});
 
         // Function to create or update the parameter
         async function putParameter() {
@@ -29,16 +29,19 @@ async function run() {
                 Overwrite: true
             };
 
-            await ssm.putParameter(params).promise();
+            const putParameterCommand = new PutParameterCommand(params);
+            await ssmClient.send(putParameterCommand);
             console.log(`Parameter stored at path: ${ssmPath}`);
         }
 
         // Attempt to get the current value from SSM
         try {
-            const currentParam = await ssm.getParameter({
+            const getParameterCommand = new GetParameterCommand({
                 Name: ssmPath,
                 WithDecryption: true
-            }).promise();
+            });
+
+            const currentParam = await ssmClient.send(getParameterCommand);
 
             // Compare and update only if different
             if (currentParam.Parameter.Value !== fileContent) {
@@ -47,7 +50,7 @@ async function run() {
                 console.log(`No update required. SSM Parameter at path ${ssmPath} is up-to-date.`);
             }
         } catch (error) {
-            if (error.code === 'ParameterNotFound') {
+            if (error.name === 'ParameterNotFound') {
                 // Parameter not found, create a new one
                 console.log(`Parameter not found at path: ${ssmPath}. Creating a new parameter.`);
                 await putParameter();
