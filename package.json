@@ -1,6 +1,6 @@
 {
-    "name": "aws-store-sqs-config-ssm",
-    "version": "0.0.1",
+    "name": "github-actions-store-sqs-config-ssm",
+    "version": "0.0.2",
     "description": "A GitHub Action to store file contents to AWS SSM, with optional base64 encoding",
     "main": "index.js",
     "scripts": {
@@ -8,7 +8,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/your-username/aws-store-sqs-config-ssm.git"
+        "url": "git+https://github.com/bisnow/github-actions-store-sqs-config-ssm.git"
     },
     "keywords": [
         "github",
@@ -23,6 +23,6 @@
     "dependencies": {
         "@actions/core": "^1.10.1",
         "@actions/github": "^6.0.0",
-        "aws-sdk": "^2.814.0"
+        "aws-sdk": "^2.1509.0"
     }
 }
