@@ -13,7 +13,7 @@ Github action for storing files in ssm
 ## Example usage
 
 ```yaml
-        uses: bisnow/github-actions-store-sqs-config-ssm@v1
+        uses: bisnow/github-actions-store-sqs-config-ssm@v1.1
         with:
           file-path: ./deploy/${{ env.ENVIRONMENT }}/etc/sqs-worker.conf
           base64: 'true'
